@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="房贷计算器：支持商业贷款、公积金贷款、组合贷款，等额本息/等额本金实时测算，还款明细与图表一应俱全。">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🏠%3C/text%3E%3C/svg%3E">
+  <title>房贷计算器</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="container header-inner">
+    <h1 class="logo"><span class="logo-icon" aria-hidden="true">🏠</span>房贷计算器</h1>
+    <p class="subtitle">商业贷款 · 公积金贷款 · 组合贷款 ｜ 等额本息 / 等额本金 实时测算</p>
+  </div>
+</header>
+
+<main class="container layout">
+  <!-- ================= 左：贷款条件设置 ================= -->
+  <section class="panel setup-panel" aria-label="贷款条件设置">
+    <h2 class="panel-title"><span class="step">1</span>选择贷款条件</h2>
+
+    <!-- 贷款方式 -->
+    <div class="tabs" role="tablist" aria-label="贷款方式">
+      <button type="button" class="tab is-active" role="tab" aria-selected="true" data-loan-type="commercial">商业贷款</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" data-loan-type="fund">公积金贷款</button>
+      <button type="button" class="tab" role="tab" aria-selected="false" data-loan-type="combined">组合贷款</button>
+    </div>
+
+    <!-- 还款方式 -->
+    <div class="field">
+      <span class="field-label">还款方式</span>
+      <div class="radio-group" role="radiogroup" aria-label="还款方式">
+        <label class="radio">
+          <input type="radio" name="method" value="annuity" checked>
+          <span>等额本息</span>
+        </label>
+        <label class="radio">
+          <input type="radio" name="method" value="equalPrincipal">
+          <span>等额本金</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- 单笔贷款金额（商业/公积金模式共用） -->
+    <div class="field" id="singleAmountField">
+      <div class="field-head">
+        <label class="field-label" for="amount">贷款金额</label>
+        <span class="field-extra" id="singleAmountTitle">商业贷款</span>
+      </div>
+      <div class="input-unit">
+        <input type="number" id="amount" min="1" max="2000" step="1" inputmode="decimal" value="100">
+        <span class="unit">万元</span>
+      </div>
+      <input type="range" id="amountRange" min="1" max="2000" step="1" value="100" aria-label="贷款金额滑杆">
+      <div class="field-error" id="amountError"></div>
+    </div>
+
+    <!-- 组合贷款：两大部分 -->
+    <div class="combined-fields" id="combinedFields" hidden>
+      <div class="sub-block">
+        <div class="sub-title">商业贷款部分</div>
+        <div class="input-unit">
+          <input type="number" id="comAmount" min="0" max="2000" step="1" inputmode="decimal" value="50">
+          <span class="unit">万元</span>
+        </div>
+        <div class="input-unit">
+          <input type="number" id="comRate" min="0" max="20" step="0.01" inputmode="decimal" value="3.5">
+          <span class="unit">%</span>
+        </div>
+        <div class="field-error" id="comRateError"></div>
+        <div class="field-error" id="comAmountError"></div>
+      </div>
+      <div class="sub-block">
+        <div class="sub-title">公积金贷款部分</div>
+        <div class="input-unit">
+          <input type="number" id="fundAmount" min="0" max="2000" step="1" inputmode="decimal" value="50">
+          <span class="unit">万元</span>
+        </div>
+        <div class="input-unit">
+          <input type="number" id="fundRate" min="0" max="20" step="0.01" inputmode="decimal" value="2.6">
+          <span class="unit">%</span>
+        </div>
+        <div class="field-error" id="fundRateError"></div>
+        <div class="field-error" id="fundAmountError"></div>
+      </div>
+    </div>
+
+    <!-- 贷款年限（三种模式共用） -->
+    <div class="field">
+      <div class="field-head">
+        <label class="field-label" for="years">贷款年限</label>
+        <span class="field-extra">1 – 30 年</span>
+      </div>
+      <div class="input-unit">
+        <input type="number" id="years" min="1" max="30" step="1" inputmode="numeric" value="30">
+        <span class="unit">年</span>
+      </div>
+      <input type="range" id="yearsRange" min="1" max="30" step="1" value="30" aria-label="贷款年限滑杆">
+      <div class="quick-btns" id="yearsQuick">
+        <button type="button" data-years="5">5年</button>
+        <button type="button" data-years="10">10年</button>
+        <button type="button" data-years="20">20年</button>
+        <button type="button" data-years="30" class="is-active">30年</button>
+      </div>
+      <div class="field-error" id="yearsError"></div>
+    </div>
+
+    <!-- 贷款利率（单笔模式：商业贷款 / 公积金贷款各记各的利率） -->
+    <div class="field" id="singleRateField">
+      <div class="field-head">
+        <label class="field-label" for="rate">贷款利率</label>
+        <span class="field-extra" id="singleRateTitle">商业贷款 · 年利率 %</span>
+      </div>
+      <div class="input-unit">
+        <input type="number" id="rate" min="0" max="20" step="0.01" inputmode="decimal" value="3.5">
+        <span class="unit">%</span>
+      </div>
+      <div class="field-error" id="rateError"></div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn-primary" id="calcBtn">开始计算</button>
+      <button type="button" class="btn-ghost" id="saveBtn" disabled>保存本次记录</button>
+    </div>
+    <p class="tip">💡 利率与公积金贷款额度上限请按当地实际政策填写。本工具结果仅供参考，实际以银行审批为准。</p>
+  </section>
+
+  <!-- ================= 右：提前还款设置 ================= -->
+  <aside class="panel prepay-panel" aria-label="提前还款设置">
+    <h2 class="panel-title">提前还款</h2>
+    <p class="panel-sub">可选，填写期数后生效</p>
+
+    <div class="field">
+      <div class="field-head">
+        <label class="field-label" for="prepayMonth">还款期数</label>
+        <span class="field-extra">第几期</span>
+      </div>
+      <div class="input-unit">
+        <input type="number" id="prepayMonth" min="1" step="1" inputmode="numeric" placeholder="如 60">
+        <span class="unit">期</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-head">
+        <label class="field-label" for="prepayAmount">还款金额</label>
+        <span class="field-extra">万元</span>
+      </div>
+      <div class="input-unit">
+        <input type="number" id="prepayAmount" min="0" step="1" inputmode="decimal" placeholder="如 20">
+        <span class="unit">万元</span>
+      </div>
+    </div>
+
+    <div class="field">
+      <span class="field-label">处理方式</span>
+      <div class="radio-group prepay-strategy" role="radiogroup" aria-label="提前还款方式">
+        <label class="radio">
+          <input type="radio" name="prepayStrategy" value="reducePayment" checked>
+          <span>减少月供（期限不变）</span>
+        </label>
+        <label class="radio">
+          <input type="radio" name="prepayStrategy" value="shortenTerm">
+          <span>缩短年限（月供不变）</span>
+        </label>
+        <label class="radio">
+          <input type="radio" name="prepayStrategy" value="payoff">
+          <span>一次性结清</span>
+        </label>
+      </div>
+      <div class="field-error" id="prepayError"></div>
+    </div>
+
+    <div class="prepay-bar" id="prepayBar" hidden></div>
+
+    <p class="tip">💡 提前还款计入第 N 期正常还款之后；组合贷款按各部分剩余本金比例分摊。等额本金下「缩短年限」指每期本金不变，月供仍逐月递减。</p>
+  </aside>
+
+  <!-- ================= 右：计算与还款数据 ================= -->
+  <section class="panel result-panel" aria-label="计算结果与还款数据">
+    <h2 class="panel-title"><span class="step">2</span>查询还款数据</h2>
+    <p class="result-status" id="resultStatus" role="status" hidden>输入未通过校验，以下仍显示上次有效结果。</p>
+
+    <!-- 汇总卡片 -->
+    <div class="summary-grid">
+      <div class="summary-card summary-main">
+        <div class="summary-label">每月月供</div>
+        <div class="summary-value" id="monthlyValue">—</div>
+        <div class="summary-sub" id="monthlySplit"></div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">还款总额</div>
+        <div class="summary-value" id="totalValue">—</div>
+        <div class="summary-sub" id="totalSub">元</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">利息总额</div>
+        <div class="summary-value" id="interestValue">—</div>
+        <div class="summary-sub" id="interestSub">元</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">利息占比</div>
+        <div class="summary-value" id="ratioValue">—</div>
+        <div class="summary-sub" id="ratioSub">利息 ÷ 还款总额</div>
+      </div>
+    </div>
+
+    <div class="extra-bar" id="extraBar" hidden></div>
+
+    <!-- 图表 -->
+    <div class="charts">
+      <div class="chart-box">
+        <div class="chart-title">本金 / 利息占比</div>
+        <div id="donutChart" class="chart"></div>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">还款曲线（累计还款 · 累计利息 · 剩余本金）</div>
+        <div id="lineChart" class="chart"></div>
+      </div>
+    </div>
+
+    <!-- 还款明细 -->
+    <div class="table-block">
+      <div class="table-head">
+        <span class="table-title">还款明细表</span>
+        <label class="filter-label">按年筛选
+          <select id="yearFilter" aria-label="按年筛选还款明细"></select>
+        </label>
+      </div>
+      <div class="table-section-summary" id="tableSectionSummary"></div>
+      <div class="table-wrap">
+        <table class="schedule-table">
+          <thead>
+            <tr>
+              <th class="num">期数</th>
+              <th class="num">月供（元）</th>
+              <th class="num">本金（元）</th>
+              <th class="num">利息（元）</th>
+              <th class="num">剩余本金（元）</th>
+              <th class="num">累计利息（元）</th>
+            </tr>
+          </thead>
+          <tbody id="scheduleBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 历史记录 -->
+    <div class="history-block">
+      <div class="history-head">
+        <span class="table-title">历史记录</span>
+        <button type="button" class="link-btn" id="clearHistory">清空全部</button>
+      </div>
+      <div id="historyList" class="history-list">
+        <p class="history-empty">暂无记录，计算后可点击「保存本次记录」</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="app-footer">
+  <div class="container">
+    房贷计算器 · 纯前端本地计算，历史记录仅保存在浏览器本地（localStorage）
+  </div>
+</footer>
+
+<script src="js/calculator.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

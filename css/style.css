@@ -1,0 +1,753 @@
+/* ============ 房贷计算器 样式 ============ */
+:root {
+  --primary: #ff6a3d;
+  --primary-dark: #e84e1e;
+  --primary-soft: #fff1ec;
+  --amber: #f59e0b;
+  --blue: #3b82f6;
+  --green: #10b981;
+  --bg: #f3f5f8;
+  --card: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --border: #e5e9f0;
+  --radius: 12px;
+  --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 6px 24px rgba(15, 23, 42, 0.06);
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+/* hidden 属性必须始终生效，防止组件级 display 规则覆盖（如 .combined-fields 的 display:grid） */
+[hidden] { display: none !important; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.55;
+}
+
+.container {
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* ============ 顶栏 ============ */
+.app-header {
+  background: linear-gradient(120deg, #f2471d, #ff6a3d 55%, #ff9366);
+  color: #fff;
+  padding: 26px 0 22px;
+}
+
+.header-inner { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+
+.logo {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.logo-icon { margin-right: 6px; }
+
+.subtitle {
+  margin: 0;
+  font-size: 13.5px;
+  opacity: 0.92;
+}
+
+/* ============ 布局 ============ */
+.layout {
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr) 300px;
+  grid-template-areas: "setup result prepay";
+  gap: 20px;
+  padding-top: 24px;
+  padding-bottom: 40px;
+  align-items: start;
+}
+
+.panel {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  min-width: 0; /* 允许网格子项收缩，表格横向滚动而不撑开布局 */
+}
+
+.setup-panel { grid-area: setup; position: sticky; top: 16px; }
+.result-panel { grid-area: result; container-type: inline-size; }
+.prepay-panel { grid-area: prepay; position: sticky; top: 16px; }
+
+.panel-sub {
+  margin: -8px 0 14px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+/* 窄栏内的提前还款方式：竖排单选 */
+.prepay-panel .prepay-strategy {
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.prepay-panel .prepay-strategy .radio {
+  justify-content: flex-start;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.panel-title {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  flex: none;
+}
+
+/* ============ 贷款方式 tabs ============ */
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  background: #eef1f5;
+  padding: 5px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+
+.tab {
+  border: 0;
+  background: transparent;
+  padding: 9px 4px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.tab:hover { color: var(--text); }
+
+.tab.is-active {
+  background: #fff;
+  color: var(--primary-dark);
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.12);
+}
+
+/* ============ 表单字段 ============ */
+.field { margin-bottom: 16px; }
+
+.field-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+
+.field-label { font-weight: 600; font-size: 13.5px; }
+
+.field-extra { color: var(--muted); font-size: 12px; }
+
+.input-unit {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  overflow: hidden;
+  background: #fff;
+  transition: border-color 0.15s ease;
+}
+
+.input-unit:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(255, 106, 61, 0.15);
+}
+
+.input-unit input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  padding: 10px 12px;
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--text);
+  background: transparent;
+  width: 100%;
+}
+
+.unit {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  background: #f6f8fa;
+  color: var(--muted);
+  font-size: 13px;
+  border-left: 1px solid var(--border);
+  flex: none;
+}
+
+input[type="range"] {
+  width: 100%;
+  margin-top: 10px;
+  accent-color: var(--primary);
+  height: 20px;
+}
+
+.quick-btns { display: flex; gap: 6px; margin-top: 8px; }
+
+.quick-btns button {
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 4px 11px;
+  font-size: 12.5px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.quick-btns button:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.quick-btns button.is-active {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+
+/* 提前还款输入与方式 */
+.prepay-strategy {
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.prepay-strategy .radio {
+  padding: 6px 11px;
+  font-size: 12.5px;
+}
+
+/* 提前还款说明条 */
+.prepay-bar {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  color: #1e40af;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.prepay-bar b { font-weight: 700; }
+
+/* 明细表中提前还款当期高亮 */
+.schedule-table tbody tr.is-prepay td {
+  background: #fff7ed;
+  font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--primary);
+}
+
+/* ============ 还款方式单选 ============ */
+.radio-group { display: flex; gap: 10px; }
+
+.radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 13.5px;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.radio:hover { border-color: var(--primary); }
+
+.radio:has(input:checked) {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+
+.radio input { accent-color: var(--primary); margin: 0; }
+
+/* ============ 组合贷款 ============ */
+.combined-fields {
+  display: grid;
+  grid-template-columns: 1fr; /* 商业贷款部分 / 公积金贷款部分 上下排列 */
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.sub-block {
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  background: #fafbfd;
+}
+
+.sub-block:hover { border-color: var(--primary); }
+
+.sub-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary-dark);
+  margin-bottom: 8px;
+}
+
+/* 错误提示 */
+.field-error {
+  color: #dc2626;
+  font-size: 12px;
+  min-height: 0;
+  margin-top: 4px;
+  display: none;
+}
+
+.field-error.show { display: block; }
+
+/* ============ 按钮 ============ */
+.actions { display: flex; gap: 10px; margin-top: 4px; }
+
+.btn-primary {
+  flex: 1;
+  border: 0;
+  background: linear-gradient(120deg, #f2471d, #ff6a3d);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 12px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 4px 14px rgba(242, 71, 29, 0.35);
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.btn-primary:active { transform: translateY(1px); }
+
+.btn-ghost {
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
+
+.btn-ghost:disabled {
+  color: var(--muted);
+  background: #f6f8fa;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.result-status {
+  margin: -6px 0 14px;
+  padding: 9px 12px;
+  border: 1px solid #f3c78b;
+  border-radius: 8px;
+  background: #fff8eb;
+  color: #8a4b08;
+  font-size: 13px;
+}
+
+.tip {
+  margin: 14px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* ============ 汇总卡片 ============ */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.summary-card {
+  background: #fafbfd;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  min-width: 0;
+}
+
+.summary-label {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.summary-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.3px;
+  word-break: break-all;
+}
+
+.summary-main {
+  grid-column: span 1;
+  background: linear-gradient(135deg, #f2471d, #ff6a3d);
+  border: 0;
+  color: #fff;
+}
+
+.summary-main .summary-value { color: #fff; font-size: 18px; }
+
+.summary-main .summary-label { color: rgba(255, 255, 255, 0.85); }
+
+.summary-sub {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+  word-break: break-all;
+}
+
+.summary-main .summary-sub { color: rgba(255, 255, 255, 0.9); font-size: 12.5px; }
+
+/* 等额本金补充栏 */
+.extra-bar {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  color: #92400e;
+  font-size: 13px;
+}
+
+.extra-bar b { font-weight: 700; }
+
+/* ============ 图表 ============ */
+.charts {
+  display: grid;
+  grid-template-columns: minmax(190px, 260px) minmax(0, 1fr);
+  gap: 16px;
+  margin-top: 18px;
+}
+
+/* 中栏变窄时自适应（容器查询按结果面板宽度判断） */
+@container (max-width: 560px) {
+  .charts { grid-template-columns: 1fr; }
+}
+
+@container (max-width: 620px) {
+  .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.chart-box {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  background: #fff;
+  min-width: 0;
+}
+
+.chart-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.chart { width: 100%; }
+
+.chart svg { display: block; width: 100%; height: auto; }
+
+.chart svg text { font-family: var(--font); }
+
+.legend {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  margin-top: 6px;
+  font-size: 12.5px;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+
+.legend-item { display: inline-flex; align-items: center; gap: 5px; }
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  display: inline-block;
+  flex: none;
+}
+
+/* ============ 明细表 ============ */
+.table-block { margin-top: 18px; }
+
+.table-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.table-title { font-size: 15px; font-weight: 700; }
+
+.filter-label {
+  font-size: 13px;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-label select {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-family: inherit;
+  font-size: 13px;
+  background: #fff;
+  color: var(--text);
+  outline: none;
+}
+
+.filter-label select:focus { border-color: var(--primary); }
+
+.table-section-summary {
+  font-size: 12.5px;
+  color: var(--muted);
+  background: #f6f8fa;
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin-bottom: 8px;
+}
+
+.table-section-summary b { color: var(--primary-dark); }
+
+.table-wrap {
+  max-height: 430px;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.schedule-table th {
+  position: sticky;
+  top: 0;
+  background: #f6f8fa;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  z-index: 1;
+}
+
+.schedule-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid #f0f2f5;
+  white-space: nowrap;
+}
+
+.schedule-table tbody tr:nth-child(even) { background: #fafbfd; }
+
+.schedule-table tbody tr:hover { background: var(--primary-soft); }
+
+.schedule-table tr.is-last-year td { background: #fffbeb; }
+
+.num { text-align: right; }
+
+/* ============ 历史记录 ============ */
+.history-block { margin-top: 20px; }
+
+.history-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.link-btn {
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+
+.link-btn:hover { background: var(--primary-soft); }
+
+.history-list { display: grid; gap: 8px; }
+
+.history-empty {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 4px 0;
+  text-align: center;
+  padding: 12px;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #fff;
+  transition: border-color 0.15s ease;
+}
+
+.history-item:hover { border-color: var(--primary); }
+
+.history-main { min-width: 0; flex: 1; }
+
+.history-title {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.history-meta {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.history-actions { display: flex; gap: 6px; flex: none; }
+
+.history-actions button {
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 12.5px;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--text);
+  transition: all 0.15s ease;
+}
+
+.history-actions button.load {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.history-actions button.del:hover {
+  border-color: #dc2626;
+  color: #dc2626;
+  background: #fef2f2;
+}
+
+/* ============ 页脚 ============ */
+.app-footer {
+  border-top: 1px solid var(--border);
+  padding: 22px 0 30px;
+  color: var(--muted);
+  font-size: 12.5px;
+  text-align: center;
+}
+
+/* ============ 响应式 ============ */
+@media (max-width: 1179px) {
+  .layout {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "setup"
+      "prepay"
+      "result";
+  }
+  .setup-panel,
+  .prepay-panel { position: static; }
+  .prepay-panel .prepay-strategy { flex-direction: row; flex-wrap: wrap; }
+}
+
+@media (max-width: 640px) {
+  .container { padding: 0 14px; }
+  /* Make page bands span the viewport even when an embedding wrapper is narrower. */
+  .app-header,
+  .layout,
+  .app-footer {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+  }
+  /* Keep content inset while letting the panels themselves use the full band width. */
+  .layout {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .layout > .panel {
+    border-radius: 0;
+  }
+  .app-header { padding: 20px 0 18px; }
+  .logo { font-size: 22px; }
+  .subtitle { font-size: 12.5px; }
+  .panel { padding: 16px; }
+  .charts { grid-template-columns: 1fr; }
+  .summary-grid { grid-template-columns: repeat(2, 1fr); }
+  .summary-main .summary-value { font-size: 22px; }
+  .schedule-table { font-size: 12.5px; }
+  .schedule-table th, .schedule-table td { padding: 7px 8px; }
+  .actions { flex-direction: column; }
+}
